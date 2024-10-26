@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**/sign-up", "/**/sign-in", "/h2-console/**").permitAll()
+                        .requestMatchers("/members/sign-up", "/members/sign-in", "/h2-console/**").permitAll()
                         .anyRequest().authenticated())
                 .headers(headers -> headers
                         .frameOptions(frameOptions -> frameOptions.sameOrigin()));

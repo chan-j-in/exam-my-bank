@@ -2,6 +2,7 @@ package exam.myBank.service;
 
 import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.MemberRepository;
+import exam.myBank.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,31 +20,27 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Member join(String username, String email, String password) {
+    public ResponseDto<String> join(String username, String email, String password) {
 
-        try {
-            Member member = Member.builder()
-                    .username(username)
-                    .email(email)
-                    .password(passwordEncoder.encode(password))
-                    .build();
-            memberRepository.save(member);
-            return member;
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("중복된 이메일이나 회원명입니다.");
-        }
+        if (usernameValidation(username)) return new ResponseDto<>(false, "중복된 사용자명입니다.", username);
+        if (emailValidation(email)) return new ResponseDto<>(false, "중복된 이메일입니다.", email);
+
+        Member member = Member.builder()
+                .username(username)
+                .email(email)
+                .password(passwordEncoder.encode(password))
+                .build();
+        memberRepository.save(member);
+        return new ResponseDto<>(true, "회원가입 성공", username);
+
     }
 
     private boolean emailValidation(String email) {
-        Optional<Member> member = memberRepository.findByEmail(email);
-        if (member.isEmpty()) return true;
-        return false;
+        return memberRepository.findByEmail(email).isPresent();
     }
 
     private boolean usernameValidation(String username) {
-        Optional<Member> member = memberRepository.findByUsername(username);
-        if (member.isEmpty()) return true;
-        return false;
+        return memberRepository.findByUsername(username).isPresent();
     }
 
 }
