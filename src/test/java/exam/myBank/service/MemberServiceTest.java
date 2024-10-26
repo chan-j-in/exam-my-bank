@@ -2,6 +2,7 @@ package exam.myBank.service;
 
 import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.MemberRepository;
+import exam.myBank.dto.ResponseDto;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,10 +55,11 @@ class MemberServiceTest {
                 .build();
 
         //when
-        memberService.join(memberA.getUsername(), memberA.getEmail(), memberA.getPassword());
+        ResponseDto<String> responseDto = memberService.join(memberA.getUsername(), memberA.getEmail(), memberA.getPassword());
+        ResponseDto<String> responseDto2 = memberService.join(memberA.getUsername(), memberA.getEmail(), memberA.getPassword());
 
         //then
-        assertThrows(IllegalArgumentException.class, () -> memberService.join(memberA.getUsername(), memberA.getEmail(), memberA.getPassword()));
+        assertThat(responseDto2.isSuccess()).isFalse();
 
     }
 
