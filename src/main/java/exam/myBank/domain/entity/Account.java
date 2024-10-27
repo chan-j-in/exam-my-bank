@@ -23,7 +23,7 @@ public class Account {
 
     private Long amount;
 
-    private LocalDateTime createdAt;
+    private final LocalDateTime createdAt;
 
     private LocalDateTime lastUsedAt;
 
@@ -32,14 +32,14 @@ public class Account {
     private Member member;
 
     @Builder
-    public Account(String accountName, String accountNum, Member member, Bank bank, LocalDateTime createdAt, LocalDateTime lastUsedAt) {
+    public Account(String accountName, String accountNum, Member member, Bank bank) {
         this.accountName = accountName;
         this.accountNum = accountNum;
         this.member = member;
         this.bank = bank;
+        this.createdAt = LocalDateTime.now();
+        this.lastUsedAt = LocalDateTime.now();
         this.amount = 0L;
-        this.createdAt = createdAt;
-        this.lastUsedAt = lastUsedAt;
     }
 
     public void deposit(Long amount) {
