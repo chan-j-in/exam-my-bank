@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 public class Member {
@@ -20,8 +23,12 @@ public class Member {
     @Column(unique = true)
     private String email;
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Account> accounts = new ArrayList<>();
+
     @Builder
     public Member(String username, String password, String email) {
+
         this.username = username;
         this.password = password;
         this.email = email;
