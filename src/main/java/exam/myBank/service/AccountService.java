@@ -22,10 +22,14 @@ public class AccountService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public ResponseDto<String> create(String accountName, Long memberId, Bank bank) {
+    public Account create(String accountName, Long memberId, Bank bank) {
 
         Optional<Member> member = memberRepository.findById(memberId);
-        if (member.isEmpty()) return new ResponseDto<>(false, "회원을 찾을 수 없습니다.", null);
+//        if (member.isEmpty()) return new ResponseDto<>(false, "회원을 찾을 수 없습니다.", null);
+//
+//        if (accountRepository.findByAccountName(accountName).get().getMember().getId()==memberId) {
+//            return new ResponseDto<>(false, "중복된 이름의 계좌가 존재합니다.", null);
+//        }
 
         Account account = Account.builder()
                 .accountName(accountName)
@@ -34,7 +38,7 @@ public class AccountService {
                 .bank(bank)
                 .build();
         accountRepository.save(account);
-        return new ResponseDto<>(true, "계좌등록 성공", accountName);
+        return account;
     }
 
     private String makeAccountNum(Bank bank) {
