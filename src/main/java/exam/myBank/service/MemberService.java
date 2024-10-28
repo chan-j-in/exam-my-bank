@@ -20,26 +20,21 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public ResponseDto<String> join(String username, String email, String password) {
-
-        if (usernameValidation(username)) return new ResponseDto<>(false, "중복된 사용자명입니다.", username);
-        if (emailValidation(email)) return new ResponseDto<>(false, "중복된 이메일입니다.", email);
+    public Member join(String username, String email, String password) {
 
         Member member = Member.builder()
                 .username(username)
                 .email(email)
                 .password(passwordEncoder.encode(password))
                 .build();
-        memberRepository.save(member);
-        return new ResponseDto<>(true, "회원가입 성공", username);
-
+        return memberRepository.save(member);
     }
 
-    private boolean emailValidation(String email) {
+    public boolean emailValidation(String email) {
         return memberRepository.findByEmail(email).isPresent();
     }
 
-    private boolean usernameValidation(String username) {
+    public boolean usernameValidation(String username) {
         return memberRepository.findByUsername(username).isPresent();
     }
 

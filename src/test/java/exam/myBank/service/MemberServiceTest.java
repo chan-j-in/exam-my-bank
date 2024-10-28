@@ -55,11 +55,10 @@ class MemberServiceTest {
                 .build();
 
         //when
-        ResponseDto<String> responseDto = memberService.join(memberA.getUsername(), memberA.getEmail(), memberA.getPassword());
-        ResponseDto<String> responseDto2 = memberService.join(memberA.getUsername(), memberA.getEmail(), memberA.getPassword());
+        Member findMember = memberService.join(memberA.getUsername(), memberA.getEmail(), memberA.getPassword());
 
         //then
-        assertThat(responseDto2.isSuccess()).isFalse();
+        assertThat(findMember.getUsername()).isEqualTo(memberA.getUsername());
 
     }
 

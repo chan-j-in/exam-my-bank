@@ -1,5 +1,6 @@
 package exam.myBank.controller;
 
+import exam.myBank.domain.entity.Member;
 import exam.myBank.dto.ResponseDto;
 import exam.myBank.dto.memberDto.SignupRequestDto;
 import exam.myBank.service.MemberService;
@@ -23,6 +24,7 @@ public class MemberController {
             return new ResponseDto<>(false, "두 비밀번호가 일치하지 않습니다.", null);
         }
 
-        return memberService.join(requestDto.getUsername(), requestDto.getEmail(), requestDto.getPassword());
+        Member member = memberService.join(requestDto.getUsername(), requestDto.getEmail(), requestDto.getPassword());
+        return new ResponseDto<>(true, "회원가입 성공", member.getUsername());
     }
 }
