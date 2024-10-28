@@ -20,7 +20,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http
+        return http
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
@@ -28,10 +28,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/members/sign-up", "/members/sign-in", "/h2-console/**").permitAll()
                         .anyRequest().authenticated())
+                .logout(logout -> logout
+                        .logoutUrl("/members/logout")
+                        .logoutSuccessUrl("/members/sign-in")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID"))
                 .headers(headers -> headers
-                        .frameOptions(frameOptions -> frameOptions.sameOrigin()));
-
-        return http.build();
+                        .frameOptions(frameOptions -> frameOptions.sameOrigin()))
+                .build();
     }
 
     @Bean
