@@ -3,14 +3,10 @@ package exam.myBank.service;
 import exam.myBank.domain.entity.Account;
 import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.AccountRepository;
-import exam.myBank.dto.ResponseDto;
 import exam.myBank.type.Bank;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
