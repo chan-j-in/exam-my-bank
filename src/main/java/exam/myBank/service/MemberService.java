@@ -42,4 +42,9 @@ public class MemberService {
         return memberRepository.findByUsername(username).isPresent();
     }
 
+    @Transactional
+    public void clear() {
+        memberRepository.deleteAll();
+    }
+
 }
