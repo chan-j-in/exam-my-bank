@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,6 +40,18 @@ public class AccountService {
                 .build();
         accountRepository.save(account);
         return account;
+    }
+
+    public List<Account> findAccounts(Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다. memberId: " + memberId));
+        return accountRepository.findByMemberId(memberId);
+    }
+
+    @Transactional
+    public void delete(Long accountId) {
+        accountRepository.deleteById(accountId);
     }
 
     private String makeAccountNum(Bank bank) {

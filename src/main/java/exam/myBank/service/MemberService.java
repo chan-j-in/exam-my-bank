@@ -1,6 +1,8 @@
 package exam.myBank.service;
 
+import exam.myBank.domain.entity.Account;
 import exam.myBank.domain.entity.Member;
+import exam.myBank.domain.repository.AccountRepository;
 import exam.myBank.domain.repository.MemberRepository;
 import exam.myBank.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -17,6 +20,7 @@ import java.util.Optional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
