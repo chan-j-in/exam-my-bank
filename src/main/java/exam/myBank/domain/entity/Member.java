@@ -1,6 +1,8 @@
 package exam.myBank.domain.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,5 +37,15 @@ public class Member {
         this.username = username;
         this.password = password;
         this.email = email;
+    }
+
+    public void updateEmail(String email) {
+
+        this.email = email;
+    }
+
+    public void updatePassword(String password) {
+
+        this.password = password;
     }
 }
