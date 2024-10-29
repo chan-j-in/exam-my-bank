@@ -45,14 +45,14 @@ public class Account {
         this.amount = 0L;
     }
 
-
-
-    public void deposit(Long amount) {
+    public Long deposit(Long amount) {
         this.amount += amount;
         this.lastUsedAt = LocalDateTime.now();
+
+        return this.amount;
     }
 
-    public void withdraw(Long amount) {
+    public Long withdraw(Long amount) {
         if (this.amount>=amount) {
             this.amount -= amount;
             this.lastUsedAt = LocalDateTime.now();
@@ -60,5 +60,6 @@ public class Account {
             throw new IllegalArgumentException("출금할 수 있는 잔액이 부족합니다.");
         }
 
+        return this.amount;
     }
 }

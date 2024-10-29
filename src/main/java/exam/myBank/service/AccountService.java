@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -48,19 +49,34 @@ public class AccountService {
     }
 
     @Transactional
-    public void delete(Long accountId) {
-        accountRepository.deleteById(accountId);
+    public Long deposit(String accountNum, Long amount) {
+
+        Account account = getAccountIfOwnedByCurrentUser(accountNum);
+        return account.deposit(amount);
+    }
+
+    @Transactional
+    public Long withdraw(String accountNum, Long amount) {
+
+        Account account = getAccountIfOwnedByCurrentUser(accountNum);
+        return account.withdraw(amount);
+    }
+
+    @Transactional
+    public void delete(String accountNum) {
+
+        Account account = getAccountIfOwnedByCurrentUser(accountNum);
+        accountRepository.delete(account);
     }
 
     private String makeAccountNum(Bank bank) {
 
-        String bankNum;
-        if (bank == Bank.A_BANK)
-            bankNum = "123";
-        else if (bank == Bank.B_BANK)
-            bankNum = "456";
-        else
-            bankNum = "789";
+        String bankNum = switch (bank) {
+            case A_BANK -> "123";
+            case B_BANK -> "456";
+            case C_BANK -> "789";
+            default -> "000";
+        };
 
         String accountNum;
         do {
@@ -79,6 +95,18 @@ public class AccountService {
 
         return memberRepository.findByUsername(authentication.getName()).orElseThrow(
                 ()-> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    }
+
+    private Account getAccountIfOwnedByCurrentUser(String accountNum) {
+        Account account = accountRepository.findByAccountNum(accountNum)
+                .orElseThrow(() -> new IllegalArgumentException("해당 계좌를 찾을 수 없습니다."));
+
+        Member currentMember = getCurrentMember();
+        if (!account.getMember().getId().equals(currentMember.getId())) {
+            throw new IllegalArgumentException("해당 계좌에 대한 접근 권한이 없습니다.");
+        }
+
+        return account;
     }
 
     @Transactional
