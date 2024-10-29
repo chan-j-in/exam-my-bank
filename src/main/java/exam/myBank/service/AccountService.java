@@ -5,10 +5,7 @@ import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.AccountRepository;
 import exam.myBank.domain.repository.MemberRepository;
 import exam.myBank.type.Bank;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,13 +13,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 @PreAuthorize("isAuthenticated()")
-public class AccountService {
+public class AccountService extends BaseService {
 
     private final AccountRepository accountRepository;
-    private final MemberRepository memberRepository;
+
+    public AccountService(MemberRepository memberRepository,
+                          AccountRepository accountRepository) {
+        super(memberRepository);
+        this.accountRepository = accountRepository;
+    }
 
     @Transactional
     public Account create(String accountName, Bank bank) {
@@ -83,17 +84,6 @@ public class AccountService {
         } while (accountRepository.findByAccountNum(accountNum).isPresent());
 
         return accountNum;
-    }
-
-    private Member getCurrentMember() {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalArgumentException("현재 사용자 정보를 찾을 수 없습니다."); // 예외 발생
-        }
-
-        return memberRepository.findByUsername(authentication.getName()).orElseThrow(
-                ()-> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
     }
 
     private Account getAccountIfOwnedByCurrentUser(String accountNum) {

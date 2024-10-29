@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MemberRepository memberRepository;
 
     public String signIn(SignInRequestDto requestDto) {
 
