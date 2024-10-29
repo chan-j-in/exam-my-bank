@@ -1,30 +1,24 @@
 package exam.myBank.controller;
 
-import exam.myBank.domain.entity.Member;
-import exam.myBank.dto.ResponseDto;
-import exam.myBank.dto.memberDto.SignupRequestDto;
+import exam.myBank.domain.dto.memberDto.JoinRequestDto;
 import exam.myBank.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequiredArgsConstructor
+@Slf4j
 @RestController
-@RequestMapping("/members")
+@RequiredArgsConstructor
+@RequestMapping("/api/members")
 public class MemberController {
 
     private final MemberService memberService;
 
-    @PostMapping("/sign-up")
-    public ResponseDto<String> signup(@RequestBody SignupRequestDto requestDto) {
-
-        if (!requestDto.getPassword().equals(requestDto.getPassword2())) {
-            return new ResponseDto<>(false, "두 비밀번호가 일치하지 않습니다.", null);
-        }
-
-        Member member = memberService.join(requestDto.getUsername(), requestDto.getEmail(), requestDto.getPassword());
-        return new ResponseDto<>(true, "회원가입 성공", member.getUsername());
+    @PostMapping("/join")
+    public ResponseEntity<String> join(@RequestBody JoinRequestDto requestDto) {
+        log.info("dto username : {}", requestDto.getUsername());
+        memberService.join(requestDto.getUsername(), requestDto.getPassword());
+        return ResponseEntity.ok().body("회원가입 성공");
     }
 }
