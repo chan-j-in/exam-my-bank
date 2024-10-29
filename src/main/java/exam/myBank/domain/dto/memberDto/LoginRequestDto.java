@@ -1,10 +1,12 @@
-package exam.myBank.dto.memberDto;
+package exam.myBank.domain.dto.memberDto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@Data
-public class SignInRequestDto {
+@Getter
+@AllArgsConstructor
+public class LoginRequestDto {
 
     @NotBlank(message = "사용자 이름을 입력해주세요.")
     private String username;
