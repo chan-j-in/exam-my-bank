@@ -3,6 +3,7 @@ package exam.myBank.service;
 import exam.myBank.domain.entity.Account;
 import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.AccountRepository;
+import exam.myBank.dto.memberDto.SignupRequestDto;
 import exam.myBank.type.Bank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,8 @@ class AccountServiceTest {
     @Autowired
     private AccountService accountService;
     @Autowired
+    private AuthService authService;
+    @Autowired
     private MemberService memberService;
     @Autowired
     private AccountRepository accountRepository;
@@ -38,7 +41,7 @@ class AccountServiceTest {
     @WithMockUser(username = "userA", roles = "USER")
     void 계좌생성() throws Exception {
         //given
-        Member member = memberService.join("userA", "abc@naver.com","1234");
+        Member member = authService.join(new SignupRequestDto("userA", "abc@naver.com", "1234", "1234"));
         Account account = accountService.create("accountA", Bank.B_BANK);
 
         //when
@@ -54,7 +57,7 @@ class AccountServiceTest {
     @WithMockUser(username = "userB", roles = "USER")
     void 계좌중복생성() throws Exception {
         // given
-        Member member = memberService.join("userB", "abc@naver.com","1234");
+        Member member = authService.join(new SignupRequestDto("userB", "abc@naver.com", "1234", "1234"));
         accountService.create("accountB", Bank.B_BANK);
 
         // when & then
@@ -67,7 +70,7 @@ class AccountServiceTest {
     @WithMockUser(username = "userC", roles = "USER")
     void 자신의계좌조회() throws Exception {
         // given
-        Member member = memberService.join("userC", "abc@naver.com", "1234");
+        Member member = authService.join(new SignupRequestDto("userC", "abc@naver.com", "1234", "1234"));
         accountService.create("accountC", Bank.A_BANK);
 
         // when
@@ -82,8 +85,8 @@ class AccountServiceTest {
     @WithMockUser(username = "userD", roles = "USER")
     void 다른_사용자의_계좌조회() throws Exception {
         // given
-        Member memberA = memberService.join("userD", "abc@naver.com", "1234");
-        Member memberB = memberService.join("userE", "def@naver.com", "5678");
+        Member memberA = authService.join(new SignupRequestDto("userD", "abc@naver.com", "1234", "1234"));
+        Member memberB = authService.join(new SignupRequestDto("userE", "def@naver.com", "5678", "5678"));
 
         accountService.create("accountD", Bank.B_BANK);
 
@@ -101,7 +104,7 @@ class AccountServiceTest {
     @WithMockUser(username = "userF", roles = "USER")
     void 계좌삭제() throws Exception {
         // given
-        Member member = memberService.join("userF", "abc@naver.com", "1234");
+        Member member = authService.join(new SignupRequestDto("userF", "abc@naver.com", "1234", "1234"));
         Account account = accountService.create("accountE", Bank.A_BANK);
 
         // when
@@ -126,7 +129,7 @@ class AccountServiceTest {
     @WithMockUser(username = "userG", roles = "USER")
     void 계좌입금() throws Exception {
         // given
-        Member member = memberService.join("userG", "abc@naver.com", "1234");
+        Member member = authService.join(new SignupRequestDto("userG", "abc@naver.com", "1234", "1234"));
         Account account = accountService.create("accountG", Bank.B_BANK);
 
         // when
@@ -140,7 +143,7 @@ class AccountServiceTest {
     @WithMockUser(username = "userH", roles = "USER")
     void 계좌출금() throws Exception {
         // given
-        Member member = memberService.join("userH", "def@naver.com", "5678");
+        Member member = authService.join(new SignupRequestDto("userH", "def@naver.com", "5678", "5678"));
         Account account = accountService.create("accountH", Bank.A_BANK);
         accountService.deposit(account.getAccountNum(), 10000L); // 먼저 입금
 
@@ -155,7 +158,7 @@ class AccountServiceTest {
     @WithMockUser(username = "userI", roles = "USER")
     void 출금한도초과_예외발생() throws Exception {
         // given
-        Member member = memberService.join("userI", "ghi@naver.com", "91011");
+        Member member = authService.join(new SignupRequestDto("userI", "ghi@naver.com", "91011", "91011"));
         Account account = accountService.create("accountI", Bank.C_BANK);
         accountService.deposit(account.getAccountNum(), 5000L); // 5,000원 입금
 
