@@ -3,7 +3,7 @@ package exam.myBank.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import exam.myBank.dto.memberDto.LoginRequestDto;
+import exam.myBank.dto.memberDto.SignInRequestDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,9 +30,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         log.info("JwtAuthenticationFilter 로그인 : 진입");
         ObjectMapper om = new ObjectMapper();
-        LoginRequestDto loginRequestDto = null;
+        SignInRequestDto loginRequestDto = null;
         try {
-            loginRequestDto = om.readValue(request.getInputStream(), LoginRequestDto.class);
+            loginRequestDto = om.readValue(request.getInputStream(), SignInRequestDto.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
