@@ -105,7 +105,7 @@ class AccountServiceTest {
         Account account = accountService.create("accountE", Bank.A_BANK);
 
         // when
-        accountService.delete(account.getId());
+        accountService.delete(account.getAccountNum());
 
         // then
         assertThat(accountRepository.findById(account.getId())).isEmpty();
@@ -120,5 +120,48 @@ class AccountServiceTest {
         assertThatThrownBy(() -> accountService.create("accountF", Bank.A_BANK))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("현재 사용자 정보를 찾을 수 없습니다.");
+    }
+
+    @Test
+    @WithMockUser(username = "userG", roles = "USER")
+    void 계좌입금() throws Exception {
+        // given
+        Member member = memberService.join("userG", "abc@naver.com", "1234");
+        Account account = accountService.create("accountG", Bank.B_BANK);
+
+        // when
+        Long updatedBalance = accountService.deposit(account.getAccountNum(), 5000L);
+
+        // then
+        assertThat(updatedBalance).isEqualTo(5000L);
+    }
+
+    @Test
+    @WithMockUser(username = "userH", roles = "USER")
+    void 계좌출금() throws Exception {
+        // given
+        Member member = memberService.join("userH", "def@naver.com", "5678");
+        Account account = accountService.create("accountH", Bank.A_BANK);
+        accountService.deposit(account.getAccountNum(), 10000L); // 먼저 입금
+
+        // when
+        Long updatedBalance = accountService.withdraw(account.getAccountNum(), 4000L);
+
+        // then
+        assertThat(updatedBalance).isEqualTo(6000L);
+    }
+
+    @Test
+    @WithMockUser(username = "userI", roles = "USER")
+    void 출금한도초과_예외발생() throws Exception {
+        // given
+        Member member = memberService.join("userI", "ghi@naver.com", "91011");
+        Account account = accountService.create("accountI", Bank.C_BANK);
+        accountService.deposit(account.getAccountNum(), 5000L); // 5,000원 입금
+
+        // when & then
+        assertThatThrownBy(() -> accountService.withdraw(account.getAccountNum(), 10000L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("잔액이 부족합니다.");
     }
 }
