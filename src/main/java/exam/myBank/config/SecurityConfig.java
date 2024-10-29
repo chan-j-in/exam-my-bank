@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class AuthenticationConfig {
+public class SecurityConfig {
 
     private final AuthService authService;
 
