@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/members/join", "/api/members/login", "/h2-console/**").permitAll()
+                        .requestMatchers("/api/join", "/api/login", "/api/members/**", "/h2-console/**").permitAll()
                         .anyRequest().authenticated())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
