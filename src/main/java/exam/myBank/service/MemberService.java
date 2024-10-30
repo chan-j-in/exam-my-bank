@@ -25,13 +25,15 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
 
-        return member.toResponseDto();
+        return toResponseDto(member);
     }
 
     public List<MemberResponseDto> findMembers() {
 
-        return memberRepository.findAll().stream()
-                .map(Member::toResponseDto)
+        List<Member> members = memberRepository.findAll();
+
+        return members.stream()
+                .map(this::toResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -47,4 +49,9 @@ public class MemberService {
     public void clear() {
         memberRepository.deleteAll();
     }
+
+    private MemberResponseDto toResponseDto(Member member) {
+        return new MemberResponseDto(member.getUsername(), member.getAccounts());
+    }
+
 }
