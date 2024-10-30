@@ -1,16 +1,22 @@
 package exam.myBank.service;
 
+import exam.myBank.domain.dto.accountDto.AccountCreateRequestDto;
+import exam.myBank.domain.dto.accountDto.AccountResponseDto;
 import exam.myBank.domain.entity.Account;
 import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.AccountRepository;
 import exam.myBank.domain.repository.MemberRepository;
+import exam.myBank.exception.AppException;
+import exam.myBank.exception.ErrorCode;
 import exam.myBank.type.Bank;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,8 +31,17 @@ public class AccountService extends BaseService {
         this.accountRepository = accountRepository;
     }
 
+    public List<AccountResponseDto> findAll() {
+
+        Member member = getCurrentMember();
+        return toResponseDto(accountRepository.findByMemberId(member.getId()));
+    }
+
     @Transactional
-    public Account create(String accountName, Bank bank) {
+    public ResponseEntity<String> create(AccountCreateRequestDto requestDto) {
+
+        String accountName = requestDto.getAccountName();
+        Bank bank = requestDto.getBankEnum();
 
         if (accountRepository.existsByAccountName(accountName)) throw new IllegalArgumentException("중복된 계좌 이름입니다.");
 
@@ -39,13 +54,8 @@ public class AccountService extends BaseService {
                 .bank(bank)
                 .build();
         accountRepository.save(account);
-        return account;
-    }
 
-    public List<Account> findAccounts() {
-
-        Member member = getCurrentMember();
-        return accountRepository.findByMemberId(member.getId());
+        return ResponseEntity.ok("계좌 생성 - " + account.getBank().toString() + " " + account.getAccountNum());
     }
 
     @Transactional
@@ -78,10 +88,15 @@ public class AccountService extends BaseService {
             default -> "000";
         };
 
-        String accountNum;
-        do {
-            accountNum = bankNum + UUID.randomUUID().toString().substring(0, 8);
-        } while (accountRepository.findByAccountNum(accountNum).isPresent());
+        // 8자리 랜덤 숫자 생성
+        String randomNum = String.format("%08d", (int) (Math.random() * 1_00_000_000));
+        String accountNum = bankNum + randomNum;
+
+        // 중복 체크
+        while (accountRepository.findByAccountNum(accountNum).isPresent()) {
+            randomNum = String.format("%08d", (int) (Math.random() * 1_00_000_000));
+            accountNum = bankNum + randomNum;
+        }
 
         return accountNum;
     }
@@ -102,4 +117,18 @@ public class AccountService extends BaseService {
     public void clear() {
         accountRepository.deleteAll();
     }
+
+    private List<AccountResponseDto> toResponseDto(List<Account> accounts) {
+        return accounts.stream()
+                .map(account -> new AccountResponseDto(
+                        account.getAccountName(),
+                        account.getBank(),
+                        account.getAccountNum(),
+                        account.getAmount(),
+                        account.getCreatedAt(),
+                        account.getLastUsedAt()
+                ))
+                .collect(Collectors.toList());
+    }
+
 }
