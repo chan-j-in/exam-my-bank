@@ -27,7 +27,7 @@ public class AuthService {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private Long expiredMs = 1000 * 60L;
+    private Long expiredMs = 1000 * 60L * 60;
 
     @Transactional
     public String join(JoinRequestDto requestDto) {
