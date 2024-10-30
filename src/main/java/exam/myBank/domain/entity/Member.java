@@ -1,5 +1,6 @@
 package exam.myBank.domain.entity;
 
+import exam.myBank.domain.dto.memberDto.MemberResponseDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Getter
@@ -24,6 +26,9 @@ public class Member {
 
     private String password;
 
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Account> accounts = Collections.emptyList();
+
     @Builder
     public Member(String username, String password) {
         this.username = username;
@@ -32,5 +37,9 @@ public class Member {
 
     public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public MemberResponseDto toResponseDto() {
+        return new MemberResponseDto(username, accounts);
     }
 }
