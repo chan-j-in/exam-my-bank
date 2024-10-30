@@ -1,7 +1,7 @@
 package exam.myBank.controller;
 
-import exam.myBank.domain.dto.memberDto.JoinRequestDto;
-import exam.myBank.domain.dto.memberDto.LoginRequestDto;
+import exam.myBank.domain.dto.JoinRequestDto;
+import exam.myBank.domain.dto.LoginRequestDto;
 import exam.myBank.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
