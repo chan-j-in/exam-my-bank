@@ -57,12 +57,9 @@ public class Account {
     }
 
     public Long withdraw(Long amount) {
-        if (this.amount>=amount) {
-            this.amount -= amount;
-            this.lastUsedAt = LocalDateTime.now();
-        } else {
-            throw new IllegalArgumentException("출금할 수 있는 잔액이 부족합니다.");
-        }
+
+        this.amount -= amount;
+        this.lastUsedAt = LocalDateTime.now();
 
         return this.amount;
     }
