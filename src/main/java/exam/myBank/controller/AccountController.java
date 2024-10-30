@@ -3,6 +3,7 @@ package exam.myBank.controller;
 import exam.myBank.domain.dto.accountDto.AccountCreateRequestDto;
 import exam.myBank.domain.dto.accountDto.AccountResponseDto;
 import exam.myBank.domain.dto.accountDto.TransactionRequestDto;
+import exam.myBank.domain.dto.accountDto.TransferRequestDto;
 import exam.myBank.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +40,8 @@ public class AccountController {
         return accountService.withdraw(requestDto);
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<String> test(Authentication authentication) {
-
-        return ResponseEntity.ok().body(authentication.getName()+" hello!");
+    @PostMapping("/transfer")
+    public ResponseEntity<String> transfer(@RequestBody TransferRequestDto requestDto) {
+        return accountService.transfer(requestDto);
     }
 }

@@ -3,6 +3,7 @@ package exam.myBank.service;
 import exam.myBank.domain.dto.accountDto.AccountCreateRequestDto;
 import exam.myBank.domain.dto.accountDto.AccountResponseDto;
 import exam.myBank.domain.dto.accountDto.TransactionRequestDto;
+import exam.myBank.domain.dto.accountDto.TransferRequestDto;
 import exam.myBank.domain.entity.Account;
 import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.AccountRepository;
@@ -78,11 +79,34 @@ public class AccountService extends BaseService {
         Long amount = requestDto.getAmount();
 
         Account account = getAccountIfOwnedByCurrentUser(accountNum);
-        if (account.getAmount() < amount) throw new AppException(ErrorCode.INSUFFICIENT_BALANCE, "잔액이 부족합니다. 현재 잔액 : " + account.getAmount());
+        validateSufficientBalance(account, amount);
 
         Long currentAmount = account.withdraw(amount);
 
         return ResponseEntity.ok().body("출금 완료 - 현재 잔액 : " + currentAmount);
+    }
+
+    @Transactional
+    public ResponseEntity<String> transfer(TransferRequestDto requestDto) {
+
+        String myAccountNum = requestDto.getMyAccountNum();
+        String targetAccountNum = requestDto.getTargetAccountNum();
+
+        if (myAccountNum.equals(targetAccountNum))
+            throw new AppException(ErrorCode.SAME_ACCOUNT_TRANSFER, "같은 계좌로 이체할 수 없습니다.");
+
+        Long amount = requestDto.getAmount();
+
+        Account myAccount = getAccountIfOwnedByCurrentUser(myAccountNum);
+        Account targetAccount = accountRepository.findByAccountNum(targetAccountNum)
+                        .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "이체 대상 계좌를 찾을 수 없습니다."));
+
+        validateSufficientBalance(myAccount, amount);
+
+        Long currentAmount = myAccount.withdraw(amount);
+        targetAccount.deposit(amount);
+
+        return ResponseEntity.ok().body("이체 완료 - 현재 잔액 : " + currentAmount);
     }
 
     @Transactional
@@ -132,7 +156,7 @@ public class AccountService extends BaseService {
     }
 
 
-    private List<AccountResponseDto> toResponseDto(List<Account> accounts) {
+    private static List<AccountResponseDto> toResponseDto(List<Account> accounts) {
         return accounts.stream()
                 .map(account -> new AccountResponseDto(
                         account.getAccountName(),
@@ -145,4 +169,7 @@ public class AccountService extends BaseService {
                 .collect(Collectors.toList());
     }
 
+    private static void validateSufficientBalance(Account account, Long amount) {
+        if (account.getAmount() < amount) throw new AppException(ErrorCode.INSUFFICIENT_BALANCE, "잔액이 부족합니다. 현재 잔액 : " + account.getAmount());
+    }
 }
