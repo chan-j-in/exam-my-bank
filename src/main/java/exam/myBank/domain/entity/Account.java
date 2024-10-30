@@ -22,6 +22,7 @@ public class Account {
 
     private String accountNum;
 
+    @Enumerated(EnumType.STRING)
     private Bank bank;
 
     private Long amount = 0L;
