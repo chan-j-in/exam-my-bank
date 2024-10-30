@@ -2,6 +2,7 @@ package exam.myBank.service;
 
 import exam.myBank.domain.dto.accountDto.AccountCreateRequestDto;
 import exam.myBank.domain.dto.accountDto.AccountResponseDto;
+import exam.myBank.domain.dto.accountDto.TransactionRequestDto;
 import exam.myBank.domain.entity.Account;
 import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.AccountRepository;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,21 +55,34 @@ public class AccountService extends BaseService {
                 .build();
         accountRepository.save(account);
 
-        return ResponseEntity.ok("계좌 생성 - " + account.getBank().toString() + " " + account.getAccountNum());
+        return ResponseEntity.ok().body("계좌 생성 - " + account.getBank().toString() + " " + account.getAccountNum());
     }
 
     @Transactional
-    public Long deposit(String accountNum, Long amount) {
+    public ResponseEntity<String> deposit(TransactionRequestDto requestDto) {
 
-        Account account = getAccountIfOwnedByCurrentUser(accountNum);
-        return account.deposit(amount);
+        if (requestDto.getAmount() <=0 ) throw new AppException(ErrorCode.INVALID_AMOUNT, "입금 금액은 0보다 커야 합니다.");
+
+        String accountNum = requestDto.getAccountNum();
+        Long amount = requestDto.getAmount();
+
+        Long currentAmount = getAccountIfOwnedByCurrentUser(accountNum).deposit(amount);
+
+        return ResponseEntity.ok().body("입금 완료 - 현재 잔액 : " + currentAmount);
     }
 
     @Transactional
-    public Long withdraw(String accountNum, Long amount) {
+    public ResponseEntity<String> withdraw(TransactionRequestDto requestDto) {
+
+        String accountNum = requestDto.getAccountNum();
+        Long amount = requestDto.getAmount();
 
         Account account = getAccountIfOwnedByCurrentUser(accountNum);
-        return account.withdraw(amount);
+        if (account.getAmount() < amount) throw new AppException(ErrorCode.INSUFFICIENT_BALANCE, "잔액이 부족합니다. 현재 잔액 : " + account.getAmount());
+
+        Long currentAmount = account.withdraw(amount);
+
+        return ResponseEntity.ok().body("출금 완료 - 현재 잔액 : " + currentAmount);
     }
 
     @Transactional
@@ -77,6 +90,11 @@ public class AccountService extends BaseService {
 
         Account account = getAccountIfOwnedByCurrentUser(accountNum);
         accountRepository.delete(account);
+    }
+
+    @Transactional
+    public void clear() {
+        accountRepository.deleteAll();
     }
 
     private String makeAccountNum(Bank bank) {
@@ -103,20 +121,16 @@ public class AccountService extends BaseService {
 
     private Account getAccountIfOwnedByCurrentUser(String accountNum) {
         Account account = accountRepository.findByAccountNum(accountNum)
-                .orElseThrow(() -> new IllegalArgumentException("해당 계좌를 찾을 수 없습니다."));
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "계좌를 찾을 수 없습니다."));
 
         Member currentMember = getCurrentMember();
         if (!account.getMember().getId().equals(currentMember.getId())) {
-            throw new IllegalArgumentException("해당 계좌에 대한 접근 권한이 없습니다.");
+            throw new AppException(ErrorCode.USER_NOT_AUTHENTICATED, "해당 계좌에 대한 접근 권한이 없습니다.");
         }
 
         return account;
     }
 
-    @Transactional
-    public void clear() {
-        accountRepository.deleteAll();
-    }
 
     private List<AccountResponseDto> toResponseDto(List<Account> accounts) {
         return accounts.stream()
