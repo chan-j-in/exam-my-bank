@@ -24,14 +24,14 @@ public class AuthController {
 
         log.info("dto username : {}", requestDto.getUsername());
 
-        String username = authService.join(requestDto.getUsername(), requestDto.getPassword());
-        return ResponseEntity.ok().body("회원가입 성공 id : " + username);
+        String username = authService.join(requestDto);
+        return ResponseEntity.ok().body("회원가입 성공 - id : " + username);
     }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequestDto requestDto) {
 
-        String token = authService.login(requestDto.getUsername(), requestDto.getPassword());
+        String token = authService.login(requestDto);
         return ResponseEntity.ok().body(token);
     }
 }

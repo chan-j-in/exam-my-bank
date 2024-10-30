@@ -1,5 +1,6 @@
 package exam.myBank.service;
 
+import exam.myBank.domain.dto.memberDto.JoinRequestDto;
 import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.MemberRepository;
 import exam.myBank.domain.dto.memberDto.LoginRequestDto;
@@ -29,7 +30,11 @@ public class AuthService {
     private Long expiredMs = 1000 * 60L;
 
     @Transactional
-    public String join(String username, String password) {
+    public String join(JoinRequestDto requestDto) {
+
+        String username = requestDto.getUsername();
+        String password = requestDto.getPassword();
+        String passwordCheck = requestDto.getPasswordCheck();
 
         log.info("username : {}",username);
         log.info("password : {}",password);
@@ -37,6 +42,8 @@ public class AuthService {
         memberRepository.findByUsername(username).ifPresent(user -> {
             throw new AppException(ErrorCode.USERNAME_DUPLICATED, username+"은(는) 이미 있습니다.");
         });
+
+        if (!password.equals(passwordCheck)) throw new AppException(ErrorCode.INVALID_PASSWORD, "비밀번호가 일치하지 않습니다.");
 
         Member member = Member.builder()
                 .username(username)
@@ -47,7 +54,10 @@ public class AuthService {
         return member.getUsername();
     }
 
-    public String login(String username, String password) {
+    public String login(LoginRequestDto requestDto) {
+
+        String username = requestDto.getUsername();
+        String password = requestDto.getPassword();
 
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND, username + "을(를) 찾을 수 없습니다."));
