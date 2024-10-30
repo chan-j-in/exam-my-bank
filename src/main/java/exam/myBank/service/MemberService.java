@@ -4,8 +4,10 @@ import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.MemberRepository;
 import exam.myBank.exception.AppException;
 import exam.myBank.exception.ErrorCode;
+import exam.myBank.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,24 +20,6 @@ import java.util.List;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-
-    @Transactional
-    public String join(String username, String password) {
-        log.info("username : {}",username);
-        log.info("password : {}",password);
-        memberRepository.findByUsername(username).ifPresent(user -> {
-            throw new AppException(ErrorCode.USERNAME_DUPLICATED, username+"은(는) 이미 있습니다.");
-        });
-
-        Member member = Member.builder()
-                .username(username)
-                .password(passwordEncoder.encode(password))
-                .build();
-        memberRepository.save(member);
-
-        return "success";
-    }
 
     public Member findMemberById(Long memberId) {
 
@@ -64,9 +48,9 @@ public class MemberService {
 //        memberRepository.delete(member);
 //    }
 
+
     @Transactional
     public void clear() {
         memberRepository.deleteAll();
     }
-
 }

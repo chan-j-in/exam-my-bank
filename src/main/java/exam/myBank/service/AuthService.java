@@ -2,63 +2,60 @@ package exam.myBank.service;
 
 import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.MemberRepository;
-import exam.myBank.dto.memberDto.SignInRequestDto;
-import exam.myBank.dto.memberDto.SignupRequestDto;
+import exam.myBank.domain.dto.memberDto.LoginRequestDto;
+import exam.myBank.exception.AppException;
+import exam.myBank.exception.ErrorCode;
+import exam.myBank.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class AuthService {
 
-    private final AuthenticationManager authenticationManager;
-    private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public String signIn(SignInRequestDto requestDto) {
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            requestDto.getUsername(),
-                            requestDto.getPassword()
-                    )
-            );
-
-            return "로그인 성공 id: "+requestDto.getUsername();
-        } catch (AuthenticationException e) {
-            throw new IllegalArgumentException("아이디 또는 비밀번호가 잘못되었습니다.");
-        }
-    }
+    private Long expiredMs = 1000 * 60L;
 
     @Transactional
-    public Member join(SignupRequestDto requestDto) {
+    public String join(String username, String password) {
 
-        if (usernameValidation(requestDto.getUsername())) throw new IllegalArgumentException("이미 사용 중인 사용자 이름입니다.");
-        if (emailValidation(requestDto.getUsername())) throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
-        if (!requestDto.getPassword().equals(requestDto.getPasswordCheck())) throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        log.info("username : {}",username);
+        log.info("password : {}",password);
+
+        memberRepository.findByUsername(username).ifPresent(user -> {
+            throw new AppException(ErrorCode.USERNAME_DUPLICATED, username+"은(는) 이미 있습니다.");
+        });
 
         Member member = Member.builder()
-                .username(requestDto.getUsername())
-                .email(requestDto.getEmail())
-                .password(passwordEncoder.encode(requestDto.getPassword()))
+                .username(username)
+                .password(passwordEncoder.encode(password))
                 .build();
-        return memberRepository.save(member);
+        memberRepository.save(member);
+
+        return member.getUsername();
     }
 
-    private boolean emailValidation(String email) {
-        return memberRepository.findByEmail(email).isPresent();
-    }
+    public String login(String username, String password) {
 
-    private boolean usernameValidation(String username) {
-        return memberRepository.findByUsername(username).isPresent();
-    }
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND, username + "을(를) 찾을 수 없습니다."));
 
+        if (!passwordEncoder.matches(password,member.getPassword())) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "비밀번호를 확인해주세요.");
+        }
+
+        return JwtUtil.createJWT(username, secretKey, expiredMs);
+    }
 }
