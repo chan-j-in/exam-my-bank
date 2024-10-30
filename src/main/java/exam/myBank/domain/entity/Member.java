@@ -38,8 +38,4 @@ public class Member {
     public void updatePassword(String password) {
         this.password = password;
     }
-
-    public MemberResponseDto toResponseDto() {
-        return new MemberResponseDto(username, accounts);
-    }
 }
