@@ -1,4 +1,4 @@
-package exam.myBank.domain.dto.memberDto;
+package exam.myBank.domain.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
