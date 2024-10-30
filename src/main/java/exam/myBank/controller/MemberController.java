@@ -1,12 +1,12 @@
 package exam.myBank.controller;
 
-import exam.myBank.domain.dto.memberDto.JoinRequestDto;
-import exam.myBank.domain.dto.memberDto.LoginRequestDto;
+import exam.myBank.domain.dto.memberDto.MemberResponseDto;
 import exam.myBank.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -16,5 +16,23 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    @GetMapping("/{memberId}")
+    public MemberResponseDto findMember(@PathVariable("memberId") Long memberId) {
+        return memberService.findByMemberId(memberId);
+    }
 
+    @GetMapping
+    public List<MemberResponseDto>findAll() {
+        return memberService.findMembers();
+    }
+
+    @PostMapping("/{memberId}")
+    public void deleteMember(@PathVariable("memberId") Long memberId) {
+        memberService.deleteMember(memberId);
+    }
+
+    @PostMapping("/clear")
+    public void deleteAll() {
+        memberService.clear();
+    }
 }

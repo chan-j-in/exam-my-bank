@@ -1,17 +1,16 @@
 package exam.myBank.service;
 
+import exam.myBank.domain.dto.memberDto.MemberResponseDto;
 import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.MemberRepository;
 import exam.myBank.exception.AppException;
 import exam.myBank.exception.ErrorCode;
-import exam.myBank.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -21,33 +20,28 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    public Member findMemberById(Long memberId) {
+    public MemberResponseDto findByMemberId(Long memberId) {
 
-        return memberRepository.findById(memberId)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
+        return member.toResponseDto();
     }
 
-    public List<Member> findMembers() {
+    public List<MemberResponseDto> findMembers() {
 
-        return memberRepository.findAll();
+        return memberRepository.findAll().stream()
+                .map(Member::toResponseDto)
+                .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void deleteMember(Long memberId) {
 
-//    @Transactional
-//    public Member updatePassword(String password) {
-//
-//        Member member = getCurrentMember();
-//        member.updatePassword(password);
-//        return member;
-//    }
-//
-//    @Transactional
-//    public void delete() {
-//
-//        Member member = getCurrentMember();
-//        memberRepository.delete(member);
-//    }
-
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "사용자를 찾을 수 없습니다."));
+        memberRepository.delete(member);
+    }
 
     @Transactional
     public void clear() {
