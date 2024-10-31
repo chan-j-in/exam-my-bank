@@ -68,4 +68,9 @@ public class Account {
 
         return this.amount;
     }
+
+    public void updateAccountName(String accountName) {
+
+        this.accountName = accountName;
+    }
 }

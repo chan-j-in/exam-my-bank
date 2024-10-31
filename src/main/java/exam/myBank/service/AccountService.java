@@ -144,6 +144,17 @@ public class AccountService extends BaseService {
     }
 
     @Transactional
+    public ResponseEntity<String> updateAccountName(UpdateAccountNameRequestDto requestDto) {
+
+        String accountNum = requestDto.getAccountNum();
+        String accountName = requestDto.getAccountName();
+        Account account = getAccountIfOwnedByCurrentUser(accountNum);
+        account.updateAccountName(accountName);
+
+        return ResponseEntity.ok().body("계좌 이름 변경 완료 - " + accountName);
+    }
+
+    @Transactional
     public void delete(String accountNum) {
 
         Account account = getAccountIfOwnedByCurrentUser(accountNum);
