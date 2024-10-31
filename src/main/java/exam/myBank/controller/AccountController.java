@@ -1,9 +1,6 @@
 package exam.myBank.controller;
 
-import exam.myBank.domain.dto.accountDto.AccountCreateRequestDto;
-import exam.myBank.domain.dto.accountDto.AccountResponseDto;
-import exam.myBank.domain.dto.accountDto.TransactionRequestDto;
-import exam.myBank.domain.dto.accountDto.TransferRequestDto;
+import exam.myBank.domain.dto.accountDto.*;
 import exam.myBank.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -43,5 +40,10 @@ public class AccountController {
     @PostMapping("/transfer")
     public ResponseEntity<String> transfer(@RequestBody TransferRequestDto requestDto) {
         return accountService.transfer(requestDto);
+    }
+
+    @GetMapping("/{accountNum}/transactions")
+    public List<TransactionResponseDto> getTransactions(@PathVariable("accountNum") String accountNum) {
+        return accountService.getTransactionHistory(accountNum);
     }
 }

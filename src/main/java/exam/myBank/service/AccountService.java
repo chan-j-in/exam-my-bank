@@ -1,16 +1,16 @@
 package exam.myBank.service;
 
-import exam.myBank.domain.dto.accountDto.AccountCreateRequestDto;
-import exam.myBank.domain.dto.accountDto.AccountResponseDto;
-import exam.myBank.domain.dto.accountDto.TransactionRequestDto;
-import exam.myBank.domain.dto.accountDto.TransferRequestDto;
+import exam.myBank.domain.dto.accountDto.*;
 import exam.myBank.domain.entity.Account;
 import exam.myBank.domain.entity.Member;
+import exam.myBank.domain.entity.Transaction;
 import exam.myBank.domain.repository.AccountRepository;
 import exam.myBank.domain.repository.MemberRepository;
+import exam.myBank.domain.repository.TransactionRepository;
 import exam.myBank.exception.AppException;
 import exam.myBank.exception.ErrorCode;
 import exam.myBank.type.Bank;
+import exam.myBank.type.TransactionType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -25,11 +25,14 @@ import java.util.stream.Collectors;
 public class AccountService extends BaseService {
 
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
 
     public AccountService(MemberRepository memberRepository,
-                          AccountRepository accountRepository) {
+                          AccountRepository accountRepository,
+                          TransactionRepository transactionRepository) {
         super(memberRepository);
         this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public List<AccountResponseDto> findAll() {
@@ -67,7 +70,12 @@ public class AccountService extends BaseService {
         String accountNum = requestDto.getAccountNum();
         Long amount = requestDto.getAmount();
 
-        Long currentAmount = getAccountIfOwnedByCurrentUser(accountNum).deposit(amount);
+        Account account = getAccountIfOwnedByCurrentUser(accountNum);
+        Long currentAmount = account.deposit(amount);
+
+        Transaction transaction = createTransaction(account, amount, currentAmount, TransactionType.DEPOSIT, null);
+        transactionRepository.save(transaction);
+        account.addTransaction(transaction);
 
         return ResponseEntity.ok().body("입금 완료 - 현재 잔액 : " + currentAmount);
     }
@@ -80,8 +88,11 @@ public class AccountService extends BaseService {
 
         Account account = getAccountIfOwnedByCurrentUser(accountNum);
         validateSufficientBalance(account, amount);
-
         Long currentAmount = account.withdraw(amount);
+
+        Transaction transaction = createTransaction(account, amount, currentAmount, TransactionType.WITHDRAW, null);
+        transactionRepository.save(transaction);
+        account.addTransaction(transaction);
 
         return ResponseEntity.ok().body("출금 완료 - 현재 잔액 : " + currentAmount);
     }
@@ -102,11 +113,34 @@ public class AccountService extends BaseService {
                         .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "이체 대상 계좌를 찾을 수 없습니다."));
 
         validateSufficientBalance(myAccount, amount);
+        Long myCurrentAmount = myAccount.withdraw(amount);
+        Long targetCurrentAmount = targetAccount.deposit(amount);
 
-        Long currentAmount = myAccount.withdraw(amount);
-        targetAccount.deposit(amount);
+        Transaction myTransaction = createTransaction(myAccount, amount, myCurrentAmount, TransactionType.TRANSFER, targetAccountNum);
+        transactionRepository.save(myTransaction);
+        myAccount.addTransaction(myTransaction);
 
-        return ResponseEntity.ok().body("이체 완료 - 현재 잔액 : " + currentAmount);
+        Transaction targetTransaction = createTransaction(targetAccount, amount, targetCurrentAmount, TransactionType.TRANSFER, myAccountNum);
+        transactionRepository.save(targetTransaction);
+        targetAccount.addTransaction(targetTransaction);
+
+        return ResponseEntity.ok().body("이체 완료 - 내 계좌  현재 잔액 : " + myCurrentAmount);
+    }
+
+    public List<TransactionResponseDto> getTransactionHistory(String accountNum) {
+
+        getAccountIfOwnedByCurrentUser(accountNum);
+        Account account = accountRepository.findByAccountNum(accountNum)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "계좌를 찾지 못하였습니다."));
+
+        return transactionRepository.findByAccount(account).stream()
+                .map(transcation -> new TransactionResponseDto(
+                        transcation.getTransactionType(),
+                        transcation.getAmount(),
+                        transcation.getBalanceAfterTransaction(),
+                        transcation.getTransactionDate(),
+                        transcation.getTargetAccountNum()))
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -153,6 +187,17 @@ public class AccountService extends BaseService {
         }
 
         return account;
+    }
+
+    private static Transaction createTransaction(Account account, Long amount, Long currentAmount, TransactionType type, String targetAccountNum) {
+
+        return Transaction.builder()
+                .account(account)
+                .amount(amount)
+                .balanceAfterTransaction(currentAmount)
+                .transactionType(type)
+                .targetAccountNum(targetAccountNum)
+                .build();
     }
 
 
