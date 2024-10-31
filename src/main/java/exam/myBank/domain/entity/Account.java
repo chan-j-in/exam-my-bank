@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -35,18 +37,21 @@ public class Account {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Transaction> transactions = new ArrayList<>();
+
     @Builder
     public Account(String accountName, String accountNum, Member member, Bank bank) {
         this.accountName = accountName;
         this.accountNum = accountNum;
         this.member = member;
         this.bank = bank;
-    }
-
-    @PrePersist
-    public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.lastUsedAt = LocalDateTime.now();
+    }
+
+    public void addTransaction(Transaction transaction) {
+        transactions.add(transaction); // 거래를 리스트에 추가
     }
 
     public Long deposit(Long amount) {
