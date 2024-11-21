@@ -4,7 +4,6 @@ import exam.myBank.domain.dto.accountDto.*;
 import exam.myBank.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,14 +26,14 @@ public class AccountController {
         return accountService.create(requestDto);
     }
 
-    @PostMapping("/deposit")
-    public ResponseEntity<String> deposit(@RequestBody TransactionRequestDto requestDto) {
-        return accountService.deposit(requestDto);
+    @PostMapping("/{accountNum}/deposit")
+    public ResponseEntity<String> deposit(@PathVariable("accountNum") String accountNum, @RequestBody TransactionRequestDto requestDto) {
+        return accountService.deposit(accountNum, requestDto);
     }
 
-    @PostMapping("/withdraw")
-    public ResponseEntity<String> withdraw(@RequestBody TransactionRequestDto requestDto) {
-        return accountService.withdraw(requestDto);
+    @PostMapping("/{accountNum}/withdraw")
+    public ResponseEntity<String> withdraw(@PathVariable("accountNum") String accountNum, @RequestBody TransactionRequestDto requestDto) {
+        return accountService.withdraw(accountNum, requestDto);
     }
 
     @PostMapping("/transfer")
