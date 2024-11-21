@@ -9,6 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TransactionRequestDto {
 
-    private String accountNum;
     private Long amount;
 }
