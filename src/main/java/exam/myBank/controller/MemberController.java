@@ -26,12 +26,12 @@ public class MemberController {
         return memberService.findMembers();
     }
 
-    @PostMapping("/{memberId}")
+    @DeleteMapping("/{memberId}")
     public void deleteMember(@PathVariable("memberId") Long memberId) {
         memberService.deleteMember(memberId);
     }
 
-    @PostMapping("/clear")
+    @DeleteMapping
     public void deleteAll() {
         memberService.clear();
     }
