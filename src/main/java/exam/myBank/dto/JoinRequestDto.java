@@ -1,4 +1,4 @@
-package exam.myBank.domain.dto;
+package exam.myBank.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

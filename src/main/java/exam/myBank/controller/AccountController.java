@@ -1,6 +1,6 @@
 package exam.myBank.controller;
 
-import exam.myBank.domain.dto.accountDto.*;
+import exam.myBank.dto.accountDto.*;
 import exam.myBank.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

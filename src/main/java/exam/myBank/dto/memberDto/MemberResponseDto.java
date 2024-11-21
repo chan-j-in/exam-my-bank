@@ -1,4 +1,4 @@
-package exam.myBank.domain.dto.memberDto;
+package exam.myBank.dto.memberDto;
 
 import exam.myBank.domain.entity.Account;
 import lombok.AllArgsConstructor;

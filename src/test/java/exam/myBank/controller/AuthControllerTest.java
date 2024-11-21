@@ -1,8 +1,8 @@
 package exam.myBank.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import exam.myBank.domain.dto.JoinRequestDto;
-import exam.myBank.domain.dto.LoginRequestDto;
+import exam.myBank.dto.JoinRequestDto;
+import exam.myBank.dto.LoginRequestDto;
 import exam.myBank.exception.AppException;
 import exam.myBank.exception.ErrorCode;
 import exam.myBank.service.AuthService;

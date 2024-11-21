@@ -1,14 +1,11 @@
 package exam.myBank.domain.entity;
 
-import exam.myBank.domain.dto.memberDto.MemberResponseDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 

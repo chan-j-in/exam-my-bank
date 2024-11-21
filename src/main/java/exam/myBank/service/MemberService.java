@@ -1,6 +1,6 @@
 package exam.myBank.service;
 
-import exam.myBank.domain.dto.memberDto.MemberResponseDto;
+import exam.myBank.dto.memberDto.MemberResponseDto;
 import exam.myBank.domain.entity.Member;
 import exam.myBank.domain.repository.MemberRepository;
 import exam.myBank.exception.AppException;

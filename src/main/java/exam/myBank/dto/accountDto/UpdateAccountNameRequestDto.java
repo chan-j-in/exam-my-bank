@@ -1,4 +1,4 @@
-package exam.myBank.domain.dto.accountDto;
+package exam.myBank.dto.accountDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
