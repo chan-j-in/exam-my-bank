@@ -63,11 +63,10 @@ public class AccountService extends BaseService {
     }
 
     @Transactional
-    public ResponseEntity<String> deposit(TransactionRequestDto requestDto) {
+    public ResponseEntity<String> deposit(String accountNum, TransactionRequestDto requestDto) {
 
         if (requestDto.getAmount() <=0 ) throw new AppException(ErrorCode.INVALID_AMOUNT, "입금 금액은 0보다 커야 합니다.");
 
-        String accountNum = requestDto.getAccountNum();
         Long amount = requestDto.getAmount();
 
         Account account = getAccountIfOwnedByCurrentUser(accountNum);
@@ -81,9 +80,8 @@ public class AccountService extends BaseService {
     }
 
     @Transactional
-    public ResponseEntity<String> withdraw(TransactionRequestDto requestDto) {
+    public ResponseEntity<String> withdraw(String accountNum, TransactionRequestDto requestDto) {
 
-        String accountNum = requestDto.getAccountNum();
         Long amount = requestDto.getAmount();
 
         Account account = getAccountIfOwnedByCurrentUser(accountNum);
